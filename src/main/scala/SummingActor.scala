@@ -14,5 +14,10 @@ object BehaviourAndState extends App {
   val actorSystem = ActorSystem("HelloAkka")
   var actor = actorSystem.actorOf(Props(classOf[SummingActorWithConstructor], 10), "summingActor")
 
+  while (true ){
+    Thread.sleep(3000)
+    actor ! 1
+  }
+
   println(actor.path)
 }

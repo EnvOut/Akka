@@ -7,37 +7,42 @@ import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-public class SummingActorJava extends AbstractActor {
-    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+import java.util.Random;
 
+public class SummingActorJava extends AbstractActor {
+    private static final Random rand = new Random();
+    private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
     private final Integer magicNumber;
 
     public SummingActorJava(Integer magicNumber) {
         this.magicNumber = magicNumber;
     }
 
-    @Override
-    public Receive createReceive() {
-        return receiveBuilder()
-                .build();
+    public static void main(String[] args) {
+        ActorSystem actorSystem = ActorSystem.create("SummingSystem");
+        ActorRef actor = actorSystem.actorOf(Props.create(SummingActorJava.class, 100),"summing");
+        for (Integer i = 0; i < 100; i++) {
+            actor.tell(i, ActorRef.noSender());
+        }
     }
 
-    public static void main(String[] args) {
-        /**
-         *  val actorSystem = ActorSystem("HelloAkka")
-         var actor = actorSystem.actorOf(Props(classOf[SummingActorWithConstructor], 10), "summingActor")
+    private Integer getRandom() {
+        return rand.nextInt(10000);
+    }
 
-         while (true ){
-         Thread.sleep(3000)
-         actor ! 1
-         }
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder().match(Integer.class, i -> {
+            Integer sleepTime = getRandom();
+//            log.info(sleepTime.toString());
 
-         println(actor.path)
-         */
-        ActorSystem actorSystem = ActorSystem.create("SummingSystem");
-        ActorRef actor = actorSystem.actorOf(Props.create(SummingActorJava.class,100));
+            Thread.sleep(sleepTime);
 
-        actor.tell(1,ActorRef.noSender());
+            log.info(sleepTime.toString(), magicNumber.toString(), i.toString());
+            Integer result = magicNumber + i;
+            log.info(result.toString());
+        })
+                .build();
     }
 }
 /**

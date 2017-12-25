@@ -22,6 +22,8 @@ object FibbonachiActorApp extends App {
   val actorSystem = ActorSystem("HelloAkka")
   val actor = actorSystem.actorOf(Props[FibbonachiActor])
 
+  actor ! 10
+
   val future = (actor ? 10).mapTo[Int]
   val fibbonachiNumber = Await.result(future, 10 seconds)
   println(fibbonachiNumber)
